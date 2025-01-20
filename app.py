@@ -25,15 +25,25 @@ def setup():
         return jsonify({"message": "Setup completed", "settings": settings})
     return render_template('setup.html', title="GitHub App Setup")
 
-# Route: Webhook
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    event = request.headers.get('X-GitHub-Event', 'ping')
+    event = request.headers.get("X-GitHub-Event", "ping")
     payload = request.json
+
+    # Log básico para ver qué llega
+    print(f"Event received: {event}")
+    print(f"Payload: {payload}")
+
     if not payload:
         return jsonify({"error": "No payload provided"}), 400
-    # Handle different GitHub events here
-    return jsonify({"message": f"Webhook received for event: {event}", "payload": payload})
+
+    # Manejo de eventos específicos (como issues)
+    if event == "issues":
+        print("Issue event detected!")
+        # Puedes añadir lógica específica aquí
+
+    return jsonify({"message": f"Webhook received for event: {event}"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
