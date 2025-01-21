@@ -53,6 +53,8 @@ def is_valid_signature(payload, signature):
         bool: True si la firma es válida, False de lo contrario.
     """
     secret = WEBHOOK_SECRET.encode("utf-8")
+    payload = payload.encode("utf-8")  # Codifica el payload a bytes si es una cadena
+
     computed_signature = "sha256=" + hmac.new(secret, payload, hashlib.sha256).hexdigest()
 
     return hmac.compare_digest(computed_signature, signature)
