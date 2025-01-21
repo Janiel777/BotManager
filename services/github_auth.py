@@ -46,15 +46,37 @@ def is_valid_signature(payload, signature):
     Valida la firma del webhook enviado por GitHub.
 
     Args:
-        payload (bytes): El payload recibido del webhook.
+        payload (str): El payload recibido del webhook como una cadena JSON.
         signature (str): La firma enviada en el encabezado 'X-Hub-Signature-256'.
 
     Returns:
         bool: True si la firma es válida, False de lo contrario.
     """
-    secret = WEBHOOK_SECRET.encode("utf-8")
-    payload = payload.encode("utf-8")  # Codifica el payload a bytes si es una cadena
+    try:
+        if not signature or not signature.startswith("sha256="):
+            print("Firma ausente o formato inválido.")
+            return False
 
-    computed_signature = "sha256=" + hmac.new(secret, payload, hashlib.sha256).hexdigest()
+        # Extraer la parte hash de la firma
+        received_signature = signature.split("=")[1]
 
-    return hmac.compare_digest(computed_signature, signature)
+        # Asegúrate de que el secret esté codificado en bytes
+        secret = WEBHOOK_SECRET.encode("utf-8")
+
+        # Codifica el payload a bytes si es necesario
+        if isinstance(payload, str):
+            payload = payload.encode("utf-8")
+
+        # Genera la firma usando HMAC y SHA256
+        computed_signature = hmac.new(secret, payload, hashlib.sha256).hexdigest()
+
+        # Compara las firmas usando compare_digest para evitar ataques de tiempo
+        is_valid = hmac.compare_digest(received_signature, computed_signature)
+
+        if not is_valid:
+            print("Firma no válida.")
+        return is_valid
+
+    except Exception as e:
+        print(f"Error al validar la firma: {e}")
+        return False
