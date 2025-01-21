@@ -24,13 +24,13 @@ def webhook():
     event = request.headers.get("X-GitHub-Event", "ping")
     payload = request.json
     signature = request.headers.get("X-Hub-Signature-256")
-    payload_str = json.dumps(payload)
+    payload_raw = request.get_data()  # Obtén el payload en su forma cruda
 
     if not signature:
         return jsonify({"error": "Missing signature header"}), 403
 
         # Valida la firma del payload
-    if not is_valid_signature(payload_str, signature):
+    if not is_valid_signature(payload_raw, signature):
         return jsonify({"error": "Invalid signature"}), 403
 
     if not payload:

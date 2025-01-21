@@ -44,11 +44,9 @@ def get_or_create_installation_token(app_id, installation_id):
 def is_valid_signature(payload, signature):
     """
     Valida la firma del webhook enviado por GitHub.
-
     Args:
-        payload (str): El payload recibido del webhook como una cadena JSON.
+        payload (bytes): El payload recibido del webhook en su forma cruda.
         signature (str): La firma enviada en el encabezado 'X-Hub-Signature-256'.
-
     Returns:
         bool: True si la firma es válida, False de lo contrario.
     """
@@ -57,27 +55,18 @@ def is_valid_signature(payload, signature):
             print("Firma ausente o formato inválido.")
             return False
 
-        # Extraer la parte hash de la firma
         received_signature = signature.split("=")[1]
-
-        # Asegúrate de que el secret esté codificado en bytes
         secret = WEBHOOK_SECRET.encode("utf-8")
 
-        # Codifica el payload a bytes si es necesario
-        if isinstance(payload, str):
-            payload = payload.encode("utf-8")
-
-        # Genera la firma usando HMAC y SHA256
+        # Calcula la firma usando HMAC y SHA256
         computed_signature = hmac.new(secret, payload, hashlib.sha256).hexdigest()
 
-        # Imprime ambas firmas para depuración
+        # Imprime las firmas para depuración
         print(f"Firma recibida: {received_signature}")
         print(f"Firma calculada: {computed_signature}")
-        print(f"Payload recibido: {payload}")
-        print(f"WEBHOOK_SECRET: {WEBHOOK_SECRET}")
 
-        # Compara las firmas usando compare_digest para evitar ataques de tiempo
-        is_valid = hmac.compare_digest(received_signature, computed_signature)
+        # Compara las firmas
+        is_valid = hmac.compare_digest(computed_signature, received_signature)
 
         if not is_valid:
             print("Firma no válida.")
