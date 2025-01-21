@@ -7,6 +7,7 @@ load_dotenv()
 # Variables de entorno necesarias
 GITHUB_APP_ID = os.getenv("GITHUB_APP_ID")
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")
+WEBHOOK_SECRET=os.getenv("WEBHOOK_SECRET")
 
 # Valida que las variables esenciales estén configuradas
 if not GITHUB_APP_ID or not PRIVATE_KEY:

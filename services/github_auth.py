@@ -1,7 +1,9 @@
 import jwt
 import time
 import requests
-from config import GITHUB_APP_ID, PRIVATE_KEY
+from config import GITHUB_APP_ID, PRIVATE_KEY, WEBHOOK_SECRET
+import hmac
+import hashlib
 
 installation_token = None
 token_expiration = 0
@@ -37,3 +39,19 @@ def get_or_create_installation_token(app_id, installation_id):
     else:
         print(f"Error obteniendo el token: {response.status_code}, {response.json()}")
         return None
+
+
+def is_valid_signature(payload, signature):
+    """
+    Valida la firma del webhook enviado por GitHub.
+
+    Args:
+        payload (bytes): El payload recibido del webhook.
+        signature (str): La firma enviada en el encabezado 'X-Hub-Signature-256'.
+
+    Returns:
+        bool: True si la firma es válida, False de lo contrario.
+    """
+    computed_signature = "sha256=" + hmac.new(WEBHOOK_SECRET, payload, hashlib.sha256).hexdigest()
+
+    return hmac.compare_digest(computed_signature, signature)
