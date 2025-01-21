@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, request, jsonify, render_template
 from services.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github_events import handle_github_event
@@ -22,12 +24,13 @@ def webhook():
     event = request.headers.get("X-GitHub-Event", "ping")
     payload = request.json
     signature = request.headers.get("X-Hub-Signature-256")
+    payload_str = json.dumps(payload)
 
     if not signature:
         return jsonify({"error": "Missing signature header"}), 403
 
         # Valida la firma del payload
-    if not is_valid_signature(payload, signature):
+    if not is_valid_signature(payload_str, signature):
         return jsonify({"error": "Invalid signature"}), 403
 
     if not payload:
