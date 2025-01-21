@@ -70,6 +70,12 @@ def is_valid_signature(payload, signature):
         # Genera la firma usando HMAC y SHA256
         computed_signature = hmac.new(secret, payload, hashlib.sha256).hexdigest()
 
+        # Imprime ambas firmas para depuración
+        print(f"Firma recibida: {received_signature}")
+        print(f"Firma calculada: {computed_signature}")
+        print(f"Payload recibido: {payload}")
+        print(f"WEBHOOK_SECRET: {WEBHOOK_SECRET}")
+
         # Compara las firmas usando compare_digest para evitar ataques de tiempo
         is_valid = hmac.compare_digest(received_signature, computed_signature)
 
