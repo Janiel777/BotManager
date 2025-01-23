@@ -1,6 +1,14 @@
+import os
+
 import openai
 import json
 
+from openai import OpenAI
+
+# Inicializa el cliente OpenAI
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY")  # Asegúrate de que la API Key esté configurada en las variables de entorno
+)
 
 def get_suggested_labels(issue_title, issue_body, predefined_labels):
     """
@@ -29,19 +37,17 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
     """
 
     try:
-        # Realiza la solicitud al modelo
-        response = openai.ChatCompletion.create(
-            model="chatgpt-4o-latest",  # Cambia el modelo si lo prefieres
-            messages=[{"role": "system", "content": "You are a helpful assistant for managing GitHub issues."},
-                      {"role": "user", "content": prompt}],
+        response = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant for managing GitHub issues."},
+                {"role": "user", "content": prompt}
+            ],
+            model="gpt-4o",
             max_tokens=500,
             temperature=0.7
         )
 
-        # Extrae la respuesta
         content = response["choices"][0]["message"]["content"]
-
-        # Intenta convertir la respuesta a JSON
         suggested_labels = json.loads(content)
 
         if isinstance(suggested_labels, list):
