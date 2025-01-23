@@ -3,7 +3,7 @@ from services.github.github_actions import comment_on, set_issue_labels
 
 def handle_github_event(event, payload, token, installation_id):
     if event == "issues":
-        handle_issue_event(payload, token)
+        handle_issue_event(payload, token, installation_id)
 
 def handle_issue_event(payload, token, installation_id):
     action = payload.get("action")
