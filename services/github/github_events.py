@@ -1,4 +1,4 @@
-from services.github_actions import comment_on
+from services.github.github_actions import comment_on
 
 def handle_github_event(event, payload, token):
     if event == "issues":

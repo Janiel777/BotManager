@@ -1,8 +1,6 @@
-import json
-
 from flask import Flask, request, jsonify, render_template
-from services.github_auth import get_or_create_installation_token, is_valid_signature
-from services.github_events import handle_github_event
+from services.github.github_auth import get_or_create_installation_token, is_valid_signature
+from services.github.github_events import handle_github_event
 import config
 
 
@@ -44,6 +42,7 @@ def webhook():
 
     # Obtén el installation_id desde el payload
     installation_id = payload.get("installation", {}).get("id")
+    print("Installation id: ",installation_id)
     if not installation_id:
         return jsonify({"error": "No installation ID found in payload"}), 400
 
@@ -55,6 +54,39 @@ def webhook():
     # Maneja el evento específico
     handle_github_event(event, payload, token)
     return jsonify({"message": f"Webhook received for event: {event}"}), 200
+
+
+
+@app.route('/labels', methods=['GET'])
+def get_labels():
+    # Obtén el token de instalación
+    app_id = config.GITHUB_APP_ID
+    installation_id = request.args.get("installation_id")  # Espera el ID de instalación como parámetro
+    repo = request.args.get("repo")  # Espera el nombre del repo como parámetro (formato: owner/repo)
+
+    if not installation_id or not repo:
+        return jsonify({"error": "Missing 'installation_id' or 'repo' parameter"}), 400
+
+    token = get_or_create_installation_token(app_id, installation_id)
+    if not token:
+        return jsonify({"error": "Failed to generate installation token"}), 500
+
+    # Llama al endpoint de GitHub para obtener los labels
+    url = f"https://api.github.com/repos/{repo}/labels"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        return jsonify(response.json()), 200
+    else:
+        return jsonify({
+            "error": f"Failed to fetch labels: {response.status_code}",
+            "details": response.json()
+        }), response.status_code
 
 if __name__ == '__main__':
     app.run(debug=True)
