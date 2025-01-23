@@ -91,13 +91,27 @@ def get_labels():
             "details": response.json()
         }), response.status_code
 
+
+
+@app.route('/installations', methods=['GET'])
+def get_installations_endpoint():
+    """
+    Endpoint para devolver todos los installation IDs.
+    """
+    try:
+        installations = get_installations()
+        if installations:
+            installations_list = [
+                {"id": installation["id"], "account": installation["account"]["login"]}
+                for installation in installations
+            ]
+            return jsonify({"installations": installations_list}), 200
+        else:
+            return jsonify({"error": "No installations found or an error occurred."}), 404
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {e}"}), 500
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-    installations = get_installations()
-    if installations:
-        print("Instalaciones de la GitHub App:")
-        for installation in installations:
-            print(f"ID: {installation['id']}, Cuenta: {installation['account']['login']}")
-    else:
-        print("No se encontraron instalaciones o hubo un error.")
