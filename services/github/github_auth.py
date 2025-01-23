@@ -20,6 +20,7 @@ def get_or_create_installation_token(installation_id):
     global installation_token, token_expiration
 
     if installation_token and time.time() < token_expiration:
+        print("Token de instalacion aun no a expirado.")
         return installation_token
 
     jwt_token = generate_jwt()
@@ -35,6 +36,7 @@ def get_or_create_installation_token(installation_id):
     if response.status_code == 201:
         installation_token = response.json().get("token")
         token_expiration = time.time() + 3600
+        print("Se genero un nuevo token de instalacion")
         return installation_token
     else:
         print(f"Error obteniendo el token: {response.status_code}, {response.json()}")
@@ -62,8 +64,8 @@ def is_valid_signature(payload, signature):
         computed_signature = hmac.new(secret, payload, hashlib.sha256).hexdigest()
 
         # Imprime las firmas para depuración
-        print(f"Firma recibida: {received_signature}")
-        print(f"Firma calculada: {computed_signature}")
+        # print(f"Firma recibida: {received_signature}")
+        # print(f"Firma calculada: {computed_signature}")
 
         # Compara las firmas
         is_valid = hmac.compare_digest(computed_signature, received_signature)

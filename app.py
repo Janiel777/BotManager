@@ -45,7 +45,7 @@ def webhook():
 
     # Obtén el installation_id desde el payload
     installation_id = payload.get("installation", {}).get("id")
-    print("Installation id: ",installation_id)
+    # print("Installation id: ",installation_id)
     if not installation_id:
         return jsonify({"error": "No installation ID found in payload"}), 400
 
@@ -55,7 +55,7 @@ def webhook():
         return jsonify({"error": "Failed to generate installation token"}), 500
 
     # Maneja el evento específico
-    handle_github_event(event, payload, token, installation_id)
+    handle_github_event(event, payload, token)
     return jsonify({"message": f"Webhook received for event: {event}"}), 200
 
 
