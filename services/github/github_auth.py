@@ -16,7 +16,7 @@ def generate_jwt():
     }
     return jwt.encode(payload, PRIVATE_KEY, algorithm="RS256")
 
-def get_or_create_installation_token(app_id, installation_id):
+def get_or_create_installation_token(installation_id):
     global installation_token, token_expiration
 
     if installation_token and time.time() < token_expiration:
