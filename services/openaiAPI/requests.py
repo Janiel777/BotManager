@@ -37,12 +37,12 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
     """
 
     try:
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             messages=[
                 {"role": "system", "content": "You are a helpful assistant for managing GitHub issues."},
                 {"role": "user", "content": prompt}
             ],
-            model="gpt-4o",
+            model="gpt-4-0613",  # Cambia el modelo si lo prefieres
             max_tokens=500,
             temperature=0.7
         )
@@ -50,7 +50,10 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
         # Debug: Imprime la respuesta completa
         print(f"DEBUG: Respuesta de la API: {response}")
 
-        content = response["choices"][0]["message"]["content"]
+        # Extrae la respuesta de `choices`
+        content = response["choices"][0].get("message", {}).get("content", "")
+
+        # Intenta convertir la respuesta a JSON
         suggested_labels = json.loads(content)
 
         if isinstance(suggested_labels, list):
