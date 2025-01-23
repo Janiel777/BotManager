@@ -92,6 +92,7 @@ def get_labels():
         }), response.status_code
 
 if __name__ == '__main__':
+    app.run(debug=True)
 
     installations = get_installations()
     if installations:
@@ -100,6 +101,3 @@ if __name__ == '__main__':
             print(f"ID: {installation['id']}, Cuenta: {installation['account']['login']}")
     else:
         print("No se encontraron instalaciones o hubo un error.")
-
-
-    app.run(debug=True)
