@@ -1,4 +1,7 @@
+import requests
 from flask import Flask, request, jsonify, render_template
+
+from services.github.github_actions import get_installations
 from services.github.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github.github_events import handle_github_event
 import config
@@ -89,4 +92,14 @@ def get_labels():
         }), response.status_code
 
 if __name__ == '__main__':
+
+    installations = get_installations()
+    if installations:
+        print("Instalaciones de la GitHub App:")
+        for installation in installations:
+            print(f"ID: {installation['id']}, Cuenta: {installation['account']['login']}")
+    else:
+        print("No se encontraron instalaciones o hubo un error.")
+
+
     app.run(debug=True)

@@ -1,7 +1,40 @@
 import requests
 
-from services.github.github_auth import get_or_create_installation_token
+from services.github.github_auth import get_or_create_installation_token, generate_jwt
 
+
+
+def get_installations():
+    """
+    Obtiene todas las instalaciones de la GitHub App y devuelve sus IDs.
+
+    Returns:
+        list: Una lista de objetos que contienen detalles de las instalaciones, incluidos los installation IDs.
+    """
+    try:
+        # Genera un token JWT para autenticar la GitHub App
+
+        jwt_token = generate_jwt()
+
+        # Realiza la solicitud para obtener las instalaciones
+        url = "https://api.github.com/app/installations"
+        headers = {
+            "Authorization": f"Bearer {jwt_token}",
+            "Accept": "application/vnd.github+json",
+        }
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            installations = response.json()
+            return installations
+        else:
+            print(f"Error al obtener las instalaciones: {response.status_code}, {response.json()}")
+            return []
+
+    except Exception as e:
+        print(f"Error en la función get_installations: {e}")
+        return []
 
 def comment_on(comments_url, message, token):
     headers = {
