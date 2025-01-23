@@ -47,6 +47,9 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
             temperature=0.7
         )
 
+        # Debug: Imprime la respuesta completa
+        print(f"DEBUG: Respuesta de la API: {response}")
+
         content = response["choices"][0]["message"]["content"]
         suggested_labels = json.loads(content)
 
