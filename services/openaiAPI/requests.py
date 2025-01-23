@@ -37,30 +37,28 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
     """
 
     try:
-        response = openai.ChatCompletion.create(
+        # Realiza la solicitud al modelo
+        response = client.chat.completions.create(
+            model="gpt-4",  # Asegúrate de que tienes acceso a este modelo
             messages=[
-                {"role": "system", "content": "You are a helpful assistant for managing GitHub issues."},
+                {"role": "system", "content": "Eres un asistente útil para la gestión de issues en GitHub."},
                 {"role": "user", "content": prompt}
             ],
-            model="gpt-4-0613",  # Cambia el modelo si lo prefieres
-            max_tokens=500,
+            max_tokens=150,
             temperature=0.7
         )
 
-        # Debug: Imprime la respuesta completa
-        print(f"DEBUG: Respuesta de la API: {response}")
+        # Extrae el contenido de la respuesta
+        content = response.choices[0].message.content.strip()
 
-        # Extrae la respuesta de `choices`
-        content = response["choices"][0].get("message", {}).get("content", "")
-
-        # Intenta convertir la respuesta a JSON
+        # Intenta convertir la respuesta a una lista de etiquetas
         suggested_labels = json.loads(content)
 
         if isinstance(suggested_labels, list):
             return suggested_labels
         else:
-            raise ValueError("The response is not a valid JSON list.")
+            raise ValueError("La respuesta no es una lista JSON válida.")
 
     except Exception as e:
-        print(f"Error while getting suggested labels: {e}")
+        print(f"Error al obtener las etiquetas sugeridas: {e}")
         return []
