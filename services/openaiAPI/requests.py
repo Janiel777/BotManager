@@ -144,7 +144,8 @@ def get_pr_review_and_issue(prompt):
         else:
             print("Invalid response format. Missing 'related_issue' or 'review_analysis'.")
             return None, None
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
         print("Error decoding JSON from ChatGPT response.")
     except Exception as e:
         print(f"Unexpected error: {e}")
