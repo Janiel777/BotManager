@@ -7,7 +7,7 @@ def handle_github_event(event, payload, token):
     if event == "issues":
         handle_issue_event(payload, token)
     elif event == "pull_request":
-        handle_pull_request_event(payload, token)
+        handle_pull_request_opened_event(payload, token)
 
 def handle_issue_event(payload, token):
     action = payload.get("action")
@@ -15,11 +15,16 @@ def handle_issue_event(payload, token):
         set_issue_labels(payload, token)
 
 
-def handle_pull_request_event(payload, token):
+def handle_pull_request_opened_event(payload, token):
     """
     Maneja el evento de creación de un Pull Request.
     """
     try:
+
+        action = payload.get("action")
+        if action != "opened":  # Asegúrate de que solo se manejen PRs recién creados
+            return
+
         # Obtén los detalles del repositorio y del PR desde el payload
         repo_owner = payload["repository"]["owner"]["login"]
         repo_name = payload["repository"]["name"]
