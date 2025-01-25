@@ -52,9 +52,9 @@ def handle_issue_permissions(repo_owner, repo_name, action, username, issue_numb
         print("No se pudo cargar el archivo de permisos. Abortando operación.")
         return
 
-    allowed_users = permissions.get("allowed_users", [])
+    allowed_users = permissions.get("users_allowed_to_close_issues", [])
     allowed_users.append("janiel777-bot-manager[bot]")
-    print(f"allowed_users: {allowed_users}")
+    # print(f"allowed_users: {allowed_users}")
 
     if username not in allowed_users:
         if action == "closed":

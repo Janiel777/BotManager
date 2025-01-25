@@ -285,14 +285,14 @@ def get_permissions_file(repo_owner, repo_name, token, file_path="permissions.js
     }
 
     response = requests.get(url, headers=headers)
-    print(f"Response Content: {response.text}")  # Verifica el contenido.
+    # print(f"Response Content: {response.text}")  # Verifica el contenido.
     if response.status_code == 200:
         content = response.json()
         if "content" in content:
             # Decodificar el contenido base64
             import base64
             decoded_content = base64.b64decode(content["content"]).decode("utf-8")
-            print(json.loads(decoded_content))
+            # print(json.loads(decoded_content))
             return json.loads(decoded_content)
         else:
             print("El archivo no tiene contenido.")
