@@ -101,6 +101,10 @@ def generate_pr_prompt(pr_details, pr_files, issue_titles):
         "related_issue": <issue_number>,
         "review_analysis": "<your_detailed_analysis>"
     }}
+    
+    "related_issue" has to be an int or null. 
+    "review_analysis" has to be str.
+    
     """
     return prompt
 
