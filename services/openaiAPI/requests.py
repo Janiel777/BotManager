@@ -131,6 +131,11 @@ def get_pr_review_and_issue(prompt):
         content = response.choices[0].message.content.strip()
         print(f"ChatGPT Response: {content}")
 
+        # Detectar y eliminar delimitadores de bloques de código Markdown si están presentes
+        if content.startswith("```json") and content.endswith("```"):
+            content = content[7:-3].strip()  # Eliminar ```json al inicio y ``` al final
+            print("Markdown delimiters detected and removed from response.")
+
         # Intentar cargar el JSON para extraer los datos necesarios
         response_data = json.loads(content)
         related_issue = response_data.get("related_issue")
@@ -139,7 +144,7 @@ def get_pr_review_and_issue(prompt):
         print(f"Related issue: {related_issue} isinstance(related_issue, int): {isinstance(related_issue, int)}")
         print(f"Review analysis: {review_analysis}  isinstance(review_analysis, str): {isinstance(review_analysis, str)} ")
 
-        return related_issue, review_analysis
+        return related_issue if isinstance(related_issue, int) else None, review_analysis
 
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
