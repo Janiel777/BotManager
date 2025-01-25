@@ -139,11 +139,8 @@ def get_pr_review_and_issue(prompt):
         print(f"Related issue: {related_issue} isinstance(related_issue, int): {isinstance(related_issue, int)}")
         print(f"Review analysis: {review_analysis}  isinstance(review_analysis, str): {isinstance(review_analysis, str)} ")
 
-        if isinstance(related_issue, int) and isinstance(review_analysis, str):
-            return related_issue, review_analysis
-        else:
-            print("Invalid response format. Missing 'related_issue' or 'review_analysis'.")
-            return None, None
+        return related_issue, review_analysis
+
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON: {e}")
         print("Error decoding JSON from ChatGPT response.")
