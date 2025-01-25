@@ -93,7 +93,7 @@ def generate_pr_prompt(pr_details, pr_files, issue_titles):
     {', '.join(issue_titles)}
 
     Please perform the following tasks:
-    1. Identify the most relevant issue to link to this Pull Request from the provided list of issues.
+    1. Identify the issue to link to this pull request from the list of issues provided. There may be cases where no issues are related to the pull request, in which case null is returned.
     2. Review the changes in this Pull Request and provide a detailed analysis, including any potential improvements or issues.
 
     Response Format:
