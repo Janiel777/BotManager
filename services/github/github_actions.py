@@ -240,7 +240,8 @@ def link_issue_to_pr(repo_owner, repo_name, pull_number, issue_number, token):
 
 def get_open_issues_by_author(repo_owner, repo_name, author, token):
     """
-    Obtiene los títulos de los Issues abiertos creados por el autor del Pull Request.
+    Obtiene los títulos y números de los Issues abiertos creados por el autor del Pull Request,
+    excluyendo los Pull Requests.
     """
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
     headers = {
@@ -253,7 +254,13 @@ def get_open_issues_by_author(repo_owner, repo_name, author, token):
 
     if response.status_code == 200:
         issues = response.json()
-        return [f"#{issue['number']}: {issue['title']}" for issue in issues]
+        # Filtrar para excluir los Pull Requests (que tienen el campo "pull_request")
+        filtered_issues = [
+            f"#{issue['number']}: {issue['title']}"
+            for issue in issues
+            if "pull_request" not in issue
+        ]
+        return filtered_issues
     else:
         print(f"Error fetching open issues: {response.status_code}")
         return []
