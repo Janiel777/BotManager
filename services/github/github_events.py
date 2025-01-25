@@ -32,6 +32,7 @@ def handle_pull_request_opened_event(payload, token):
     pr_details = get_pull_request_details(repo_owner, repo_name, pull_number, token)
     pr_files = get_pull_request_files(repo_owner, repo_name, pull_number, token)
     if not pr_details or not pr_files:
+        print("Failed to fetch PR details or files.")
         return
 
     # Obtener títulos de Issues abiertos creados por el autor del PR
@@ -42,17 +43,17 @@ def handle_pull_request_opened_event(payload, token):
 
     # Obtener el número del Issue relacionado y el análisis del PR
     related_issue, review_analysis = get_pr_review_and_issue(prompt)
-    if related_issue and review_analysis:
+
+
+    if related_issue:
         # Enlazar el Issue al Pull Request
         success = link_issue_to_pr(repo_owner, repo_name, pull_number, related_issue, token)
-        if success:
-            print(f"Issue #{related_issue} linked to Pull Request #{pull_number}.")
-        else:
-            print("Failed to link the issue to the pull request.")
+        if not success:
+            print(f"Failed to link issue #{related_issue} to PR #{pull_number}.")
+    else:
+        print("No related issue identified.")
 
-        # Añadir el análisis del PR como un comentario
-        comment_on(
-            f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pull_number}/comments",
-            review_analysis,
-            token
-        )
+    if review_analysis:
+        # Añadir análisis como comentario
+        comment_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pull_number}/comments"
+        comment_on(comment_url, review_analysis, token)

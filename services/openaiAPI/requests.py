@@ -130,10 +130,13 @@ def get_pr_review_and_issue(prompt):
         related_issue = response_data.get("related_issue")
         review_analysis = response_data.get("review_analysis")
 
-        if isinstance(related_issue, int) and review_analysis:
+        if isinstance(related_issue, int) and isinstance(review_analysis, str):
             return related_issue, review_analysis
         else:
-            raise ValueError("The response did not contain valid 'related_issue' or 'review_analysis' fields.")
+            print("Invalid response format. Missing 'related_issue' or 'review_analysis'.")
+            return None, None
+    except json.JSONDecodeError:
+        print("Error decoding JSON from ChatGPT response.")
     except Exception as e:
-        print(f"Error while getting PR review and related issue: {e}")
-        return None, None
+        print(f"Unexpected error: {e}")
+    return None, None
