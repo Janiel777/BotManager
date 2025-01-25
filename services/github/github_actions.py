@@ -269,7 +269,7 @@ def get_open_issues_by_author(repo_owner, repo_name, author, token):
         return []
 
 
-def get_permissions_file(repo_owner, repo_name, token, file_path=".github/permissions.json"):
+def get_permissions_file(repo_owner, repo_name, token, file_path="permissions.json"):
     """
     Obtiene el archivo JSON de permisos desde el repositorio usando la API de GitHub.
     :param repo_owner: Dueño del repositorio.
@@ -287,10 +287,19 @@ def get_permissions_file(repo_owner, repo_name, token, file_path=".github/permis
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         content = response.json()
-        file_content = b64decode(content["content"]).decode("utf-8")
-        return json.loads(file_content)
+        if "content" in content:
+            # Decodificar el contenido base64
+            import base64
+            decoded_content = base64.b64decode(content["content"]).decode("utf-8")
+            return json.loads(decoded_content)
+        else:
+            print("El archivo no tiene contenido.")
+            return None
+    elif response.status_code == 404:
+        print("Archivo de permisos no encontrado en el repositorio.")
+        return None
     else:
-        print(f"Error al obtener el archivo de permisos: {response.status_code}")
+        print(f"Error al obtener el archivo: {response.status_code}")
         return None
 
 

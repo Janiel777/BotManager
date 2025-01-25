@@ -48,16 +48,21 @@ def handle_issue_permissions(repo_owner, repo_name, action, username, issue_numb
     """
     permissions = get_permissions_file(repo_owner, repo_name, token)
 
-    if not has_permission(username, permissions):
-        # Revertir la acción si no tiene permiso
+    if not permissions:
+        print("No se pudo cargar el archivo de permisos. Abortando operación.")
+        return
+
+    allowed_users = permissions.get("allowed_users", [])
+    allowed_users.append("janiel777-bot-manager[bot]")
+
+    if username not in allowed_users:
         if action == "closed":
             print(f"Usuario {username} no tiene permisos para cerrar el issue #{issue_number}. Reabriendo...")
             reopen_issue(repo_owner, repo_name, issue_number, token)
         elif action == "reopened":
             print(f"Usuario {username} no tiene permisos para reabrir el issue #{issue_number}. Cerrando...")
             close_issue(repo_owner, repo_name, issue_number, token)
-    else:
-        print(f"Usuario {username} tiene permisos para {action} el issue #{issue_number}.")
+        print(f"Usuario {username} no tiene permisos para {action} el issue #{issue_number}.")
 
 def handle_pull_request_opened_event(payload, token):
     """
