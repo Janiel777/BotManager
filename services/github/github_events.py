@@ -54,6 +54,7 @@ def handle_issue_permissions(repo_owner, repo_name, action, username, issue_numb
 
     allowed_users = permissions.get("allowed_users", [])
     allowed_users.append("janiel777-bot-manager[bot]")
+    print(f"allowed_users: {allowed_users}")
 
     if username not in allowed_users:
         if action == "closed":
