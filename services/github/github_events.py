@@ -1,6 +1,6 @@
 from services.github.github_actions import comment_on, set_issue_labels, get_pull_request_details, \
-    get_pull_request_files
-from services.openaiAPI.requests import generate_pr_prompt, get_pr_review
+    get_pull_request_files, get_open_issues_by_author, link_issue_to_pr
+from services.openaiAPI.requests import generate_pr_prompt, get_pr_review_and_issue
 
 
 def handle_github_event(event, payload, token):
@@ -19,38 +19,40 @@ def handle_pull_request_opened_event(payload, token):
     """
     Maneja el evento de creación de un Pull Request.
     """
-    try:
+    action = payload.get("action")
+    if action != "opened":
+        return
 
-        action = payload.get("action")
-        if action != "opened":  # Asegúrate de que solo se manejen PRs recién creados
-            return
+    repo_owner = payload["repository"]["owner"]["login"]
+    repo_name = payload["repository"]["name"]
+    pull_number = payload["pull_request"]["number"]
+    author = payload["pull_request"]["user"]["login"]
 
-        # Obtén los detalles del repositorio y del PR desde el payload
-        repo_owner = payload["repository"]["owner"]["login"]
-        repo_name = payload["repository"]["name"]
-        pull_number = payload["pull_request"]["number"]
-        comments_url = payload["pull_request"]["comments_url"]
+    # Obtener detalles y archivos del Pull Request
+    pr_details = get_pull_request_details(repo_owner, repo_name, pull_number, token)
+    pr_files = get_pull_request_files(repo_owner, repo_name, pull_number, token)
+    if not pr_details or not pr_files:
+        return
 
-        # Obtén los detalles del Pull Request
-        pr_details = get_pull_request_details(repo_owner, repo_name, pull_number, token)
-        if not pr_details:
-            print("Error: No se pudieron obtener los detalles del Pull Request.")
-            return
+    # Obtener títulos de Issues abiertos creados por el autor del PR
+    issue_titles = get_open_issues_by_author(repo_owner, repo_name, author, token)
 
-        # Obtén los archivos modificados en el Pull Request
-        pr_files = get_pull_request_files(repo_owner, repo_name, pull_number, token)
-        if not pr_files:
-            print("Error: No se pudieron obtener los archivos del Pull Request.")
-            return
+    # Generar prompt para ChatGPT
+    prompt = generate_pr_prompt(pr_details, pr_files, issue_titles)
 
-        # Genera el prompt para enviar a ChatGPT
-        prompt = generate_pr_prompt(pr_details, pr_files)
+    # Obtener el número del Issue relacionado y el análisis del PR
+    related_issue, review_analysis = get_pr_review_and_issue(prompt)
+    if related_issue and review_analysis:
+        # Enlazar el Issue al Pull Request
+        success = link_issue_to_pr(repo_owner, repo_name, pull_number, related_issue, token)
+        if success:
+            print(f"Issue #{related_issue} linked to Pull Request #{pull_number}.")
+        else:
+            print("Failed to link the issue to the pull request.")
 
-        # Envía el prompt a ChatGPT para obtener una revisión
-        review = get_pr_review(prompt)
-
-        # Publica un comentario en el Pull Request con la revisión
-        comment_on(comments_url, review, token)
-
-    except Exception as e:
-        print(f"Error al manejar el evento de Pull Request: {e}")
+        # Añadir el análisis del PR como un comentario
+        comment_on(
+            f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{pull_number}/comments",
+            review_analysis,
+            token
+        )

@@ -189,3 +189,71 @@ def get_pull_request_files(repo_owner, repo_name, pull_number, token):
 
 
 
+def link_issue_to_pr(repo_owner, repo_name, pull_number, issue_number, token):
+    """
+    Enlaza un Issue a un Pull Request mencionándolo en la descripción del PR.
+
+    Args:
+        repo_owner (str): Propietario del repositorio.
+        repo_name (str): Nombre del repositorio.
+        pull_number (int): Número del Pull Request.
+        issue_number (int): Número del Issue a enlazar.
+        token (str): Token de acceso personal o de la aplicación.
+
+    Returns:
+        bool: True si la operación fue exitosa, False en caso contrario.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls/{pull_number}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+
+    # Obtener la descripción actual del PR
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        print(f"Error al obtener el PR: {response.status_code}")
+        return False
+
+    pr_data = response.json()
+    current_body = pr_data.get("body", "")
+
+    # Añadir la referencia al Issue si no está ya presente
+    issue_reference = f"Closes #{issue_number}"
+    if issue_reference not in current_body:
+        new_body = f"{current_body}\n\n{issue_reference}"
+        data = {"body": new_body}
+
+        # Actualizar el cuerpo del PR
+        response = requests.patch(url, headers=headers, json=data)
+        if response.status_code == 200:
+            print(f"Issue #{issue_number} enlazado al PR #{pull_number} exitosamente.")
+            return True
+        else:
+            print(f"Error al actualizar el PR: {response.status_code}")
+            return False
+    else:
+        print("El Issue ya está referenciado en el PR.")
+        return True
+
+
+
+def get_open_issues_by_author(repo_owner, repo_name, author, token):
+    """
+    Obtiene los títulos de los Issues abiertos creados por el autor del Pull Request.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+    params = {"state": "open", "creator": author}
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        issues = response.json()
+        return [issue["title"] for issue in issues]
+    else:
+        print(f"Error fetching open issues: {response.status_code}")
+        return []

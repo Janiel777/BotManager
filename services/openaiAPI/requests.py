@@ -66,9 +66,10 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
 
 
 
-def generate_pr_prompt(pr_details, pr_files):
+def generate_pr_prompt(pr_details, pr_files, issue_titles):
     """
-    Genera un prompt para enviar a ChatGPT basado en los detalles y cambios de un Pull Request.
+    Genera un prompt para enviar a ChatGPT basado en los detalles y cambios de un Pull Request
+    y los títulos de los issues abiertos del creador del PR.
     """
     title = pr_details["title"]
     body = pr_details["body"]
@@ -86,24 +87,53 @@ def generate_pr_prompt(pr_details, pr_files):
     Here are the changes made in this Pull Request:
     {changes}
 
-    Please review the changes and provide suggestions for improvement or potential issues. Be specific and concise.
+    Below are the titles of the open issues created by the same author:
+
+    {', '.join(issue_titles)}
+
+    Please perform the following tasks:
+    1. Identify the most relevant issue to link to this Pull Request from the provided list of issues.
+    2. Review the changes in this Pull Request and provide a detailed analysis, including any potential improvements or issues.
+
+    Return your response in the following JSON format:
+    {{
+        "related_issue": <issue_number>,
+        "review_analysis": "<your_detailed_analysis>"
+    }}
     """
     return prompt
 
 
 
-def get_pr_review(prompt):
+def get_pr_review_and_issue(prompt):
     """
-    Envía el prompt a ChatGPT para obtener una revisión del Pull Request.
+    Envía el prompt a ChatGPT para obtener una revisión del Pull Request
+    y determinar el número del Issue relacionado.
     """
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are an expert code reviewer."},
-            {"role": "user", "content": prompt},
-        ],
-        max_tokens=500,
-        temperature=0.7
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are an expert code reviewer and GitHub issue linker."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=1000,
+            temperature=0.7
+        )
 
-    return response.choices[0].message.content.strip()
+        # Procesar la respuesta de ChatGPT
+        content = response.choices[0].message.content.strip()
+        print(f"ChatGPT Response: {content}")
+
+        # Intentar cargar el JSON para extraer los datos necesarios
+        response_data = json.loads(content)
+        related_issue = response_data.get("related_issue")
+        review_analysis = response_data.get("review_analysis")
+
+        if isinstance(related_issue, int) and review_analysis:
+            return related_issue, review_analysis
+        else:
+            raise ValueError("The response did not contain valid 'related_issue' or 'review_analysis' fields.")
+    except Exception as e:
+        print(f"Error while getting PR review and related issue: {e}")
+        return None, None
