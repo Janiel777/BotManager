@@ -97,7 +97,7 @@ def generate_pr_prompt(pr_details, pr_files, issue_titles):
     2. Review the changes in this Pull Request and provide a detailed analysis, including any potential improvements or issues.
 
     Response Format:
-    Ensure your response is valid JSON formatted exactly as follows and without any additional formatting like markdown or code blocks:
+    Please make sure your response is valid JSON formatted exactly as below and DO NOT put the json inside a markdown block. But I do want you to use markdown but as part of the review_analysis value which is part of the json and will be treated as a str:
     {{
         "related_issue": <issue_number>,
         "review_analysis": "<your_detailed_analysis>"
