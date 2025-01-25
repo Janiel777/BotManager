@@ -253,7 +253,7 @@ def get_open_issues_by_author(repo_owner, repo_name, author, token):
 
     if response.status_code == 200:
         issues = response.json()
-        return [issue["title"] for issue in issues]
+        return [f"#{issue['number']}: {issue['title']}" for issue in issues]
     else:
         print(f"Error fetching open issues: {response.status_code}")
         return []

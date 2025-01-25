@@ -96,8 +96,8 @@ def generate_pr_prompt(pr_details, pr_files, issue_titles):
     1. Identify the most relevant issue to link to this Pull Request from the provided list of issues.
     2. Review the changes in this Pull Request and provide a detailed analysis, including any potential improvements or issues.
 
-    ### Response Format:
-    Ensure your response is valid JSON formatted exactly as follows:
+    Response Format:
+    Ensure your response is valid JSON formatted exactly as follows and without any additional formatting like markdown or code blocks:
     {{
         "related_issue": <issue_number>,
         "review_analysis": "<your_detailed_analysis>"
