@@ -118,7 +118,7 @@ def get_pr_review_and_issue(prompt):
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are an expert code reviewer and GitHub issue linker."},
                 {"role": "user", "content": prompt},
