@@ -147,3 +147,45 @@ def set_issue_labels(payload, token):
     # Envía las etiquetas al nuevo endpoint para establecerlas
     set_labels_endpoint = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}/labels"
     set_labels(suggested_labels, set_labels_endpoint, token)
+
+
+
+
+def get_pull_request_details(repo_owner, repo_name, pull_number, token):
+    """
+    Obtiene los detalles de un Pull Request específico.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls/{pull_number}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error fetching PR details: {response.status_code}")
+        return None
+
+
+
+def get_pull_request_files(repo_owner, repo_name, pull_number, token):
+    """
+    Obtiene los archivos modificados en un Pull Request y su diff.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls/{pull_number}/files"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    }
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error fetching PR files: {response.status_code}")
+        return None
+
+
+

@@ -62,3 +62,48 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
     except Exception as e:
         print(f"Error al obtener las etiquetas sugeridas: {e}")
         return []
+
+
+
+
+def generate_pr_prompt(pr_details, pr_files):
+    """
+    Genera un prompt para enviar a ChatGPT basado en los detalles y cambios de un Pull Request.
+    """
+    title = pr_details["title"]
+    body = pr_details["body"]
+    changes = ""
+
+    for file in pr_files:
+        changes += f"File: {file['filename']}\nDiff:\n{file['patch']}\n\n"
+
+    prompt = f"""
+    A Pull Request has been created with the following details:
+
+    Title: {title}
+    Description: {body}
+
+    Here are the changes made in this Pull Request:
+    {changes}
+
+    Please review the changes and provide suggestions for improvement or potential issues. Be specific and concise.
+    """
+    return prompt
+
+
+
+def get_pr_review(prompt):
+    """
+    Envía el prompt a ChatGPT para obtener una revisión del Pull Request.
+    """
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are an expert code reviewer."},
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=500,
+        temperature=0.7
+    )
+
+    return response.choices[0].message.content.strip()
