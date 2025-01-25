@@ -67,6 +67,7 @@ def get_suggested_labels(issue_title, issue_body, predefined_labels):
 
 
 def generate_pr_prompt(pr_details, pr_files, issue_titles):
+    print(f"Estos son los issues del author: {issue_titles}")
     """
     Genera un prompt para enviar a ChatGPT basado en los detalles y cambios de un Pull Request
     y los títulos de los issues abiertos del creador del PR.
@@ -102,7 +103,7 @@ def generate_pr_prompt(pr_details, pr_files, issue_titles):
         "review_analysis": "<your_detailed_analysis>"
     }}
     
-    "related_issue" has to be an int or null. 
+    "related_issue" has to be an int or null. It must be one of the issue numbers passed in the list of issues. If the list is empty or the issue numbers are not provided in it, null is returned in related_issue.
     "review_analysis" has to be str.
     
     """
