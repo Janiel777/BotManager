@@ -302,7 +302,7 @@ def has_permission(username, permissions):
     :return: True si el usuario tiene permisos, False en caso contrario.
     """
     if permissions:
-        allowed_users = permissions.get("allowed_users", [])
+        allowed_users = permissions.get("users_allowed_to_close_issues", [])
         return username in allowed_users
     else:
         print("No se pudo cargar el archivo de permisos.")
