@@ -1,3 +1,6 @@
+import json
+from base64 import b64decode
+
 import requests
 
 from services.github.github_auth import get_or_create_installation_token, generate_jwt
@@ -264,3 +267,85 @@ def get_open_issues_by_author(repo_owner, repo_name, author, token):
     else:
         print(f"Error fetching open issues: {response.status_code}")
         return []
+
+
+def get_permissions_file(repo_owner, repo_name, token, file_path=".github/permissions.json"):
+    """
+    Obtiene el archivo JSON de permisos desde el repositorio usando la API de GitHub.
+    :param repo_owner: Dueño del repositorio.
+    :param repo_name: Nombre del repositorio.
+    :param token: Token de autenticación para la GitHub App.
+    :param file_path: Ruta del archivo JSON dentro del repositorio.
+    :return: Diccionario con los permisos o None si el archivo no existe.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{file_path}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        content = response.json()
+        file_content = b64decode(content["content"]).decode("utf-8")
+        return json.loads(file_content)
+    else:
+        print(f"Error al obtener el archivo de permisos: {response.status_code}")
+        return None
+
+
+def has_permission(username, permissions):
+    """
+    Verifica si un usuario tiene permisos para cerrar/reabrir issues.
+    :param username: Nombre del usuario a verificar.
+    :param permissions: Diccionario con los permisos obtenidos del archivo JSON.
+    :return: True si el usuario tiene permisos, False en caso contrario.
+    """
+    if permissions:
+        allowed_users = permissions.get("allowed_users", [])
+        return username in allowed_users
+    else:
+        print("No se pudo cargar el archivo de permisos.")
+        return False
+
+
+def reopen_issue(repo_owner, repo_name, issue_number, token):
+    """
+    Reabre un issue usando la API de GitHub.
+    :param repo_owner: Dueño del repositorio.
+    :param repo_name: Nombre del repositorio.
+    :param issue_number: Número del issue.
+    :param token: Token de autenticación para la GitHub App.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+    data = {"state": "open"}
+    response = requests.patch(url, headers=headers, json=data)
+    if response.status_code == 200:
+        print(f"Issue #{issue_number} reabierto exitosamente.")
+    else:
+        print(f"Error al reabrir el issue #{issue_number}: {response.status_code}")
+
+
+def close_issue(repo_owner, repo_name, issue_number, token):
+    """
+    Cierra un issue usando la API de GitHub.
+    :param repo_owner: Dueño del repositorio.
+    :param repo_name: Nombre del repositorio.
+    :param issue_number: Número del issue.
+    :param token: Token de autenticación para la GitHub App.
+    """
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+    data = {"state": "closed"}
+    response = requests.patch(url, headers=headers, json=data)
+    if response.status_code == 200:
+        print(f"Issue #{issue_number} cerrado exitosamente.")
+    else:
+        print(f"Error al cerrar el issue #{issue_number}: {response.status_code}")

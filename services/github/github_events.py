@@ -1,5 +1,6 @@
 from services.github.github_actions import comment_on, set_issue_labels, get_pull_request_details, \
-    get_pull_request_files, get_open_issues_by_author, link_issue_to_pr
+    get_pull_request_files, get_open_issues_by_author, link_issue_to_pr, get_permissions_file, has_permission, \
+    reopen_issue, close_issue
 from services.openaiAPI.requests import generate_pr_prompt, get_pr_review_and_issue
 
 
@@ -10,10 +11,53 @@ def handle_github_event(event, payload, token):
         handle_pull_request_opened_event(payload, token)
 
 def handle_issue_event(payload, token):
+    """
+    Maneja eventos relacionados con issues.
+    :param payload: Datos del evento.
+    :param token: Token de autenticación para la GitHub App.
+    """
     action = payload.get("action")
-    if action == "opened":
+    issue_number = payload.get("issue", {}).get("number")
+    repo_owner = payload.get("repository", {}).get("owner", {}).get("login")
+    repo_name = payload.get("repository", {}).get("name")
+    username = payload.get("sender", {}).get("login")
+
+    if not all([action, issue_number, repo_owner, repo_name, username]):
+        print("Faltan datos en el payload para manejar el evento de issue.")
+        return
+
+    if action in ["closed", "reopened"]:
+        # Manejar permisos para cerrar/reabrir issues
+        print(f"Evento detectado: {action} issue #{issue_number} por {username}")
+        handle_issue_permissions(repo_owner, repo_name, action, username, issue_number, token)
+
+    elif action == "opened":
+        # Etiquetar un issue recién creado
         set_issue_labels(payload, token)
 
+
+def handle_issue_permissions(repo_owner, repo_name, action, username, issue_number, token):
+    """
+    Verifica los permisos de un usuario para cerrar o reabrir un issue.
+    :param repo_owner: Dueño del repositorio.
+    :param repo_name: Nombre del repositorio.
+    :param action: Acción realizada (e.g., "closed", "reopened").
+    :param username: Usuario que realizó la acción.
+    :param issue_number: Número del issue.
+    :param token: Token de autenticación para la GitHub App.
+    """
+    permissions = get_permissions_file(repo_owner, repo_name, token)
+
+    if not has_permission(username, permissions):
+        # Revertir la acción si no tiene permiso
+        if action == "closed":
+            print(f"Usuario {username} no tiene permisos para cerrar el issue #{issue_number}. Reabriendo...")
+            reopen_issue(repo_owner, repo_name, issue_number, token)
+        elif action == "reopened":
+            print(f"Usuario {username} no tiene permisos para reabrir el issue #{issue_number}. Cerrando...")
+            close_issue(repo_owner, repo_name, issue_number, token)
+    else:
+        print(f"Usuario {username} tiene permisos para {action} el issue #{issue_number}.")
 
 def handle_pull_request_opened_event(payload, token):
     """
