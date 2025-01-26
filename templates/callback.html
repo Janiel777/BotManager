@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Callback Status</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='callback_style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>GitHub App Callback</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Status</h2>
+            <p class="message {{ status_class }}">{{ message }}</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; {{ year }} GitHub App. Built for managing repository actions efficiently.</p>
+        <p>
+            <a href="https://github.com/Janiel777/BotManager" target="_blank" rel="noopener noreferrer">
+                View the source code on GitHub
+            </a>
+        </p>
+    </footer>
+</body>
+</html>

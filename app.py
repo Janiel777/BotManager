@@ -134,15 +134,30 @@ def github_callback():
                 if username:
                     # Guardar el token en la base de datos
                     db_handler.save_user_token(username, access_token)
-                    return jsonify({"message": "Token recibido y guardado correctamente."}), 200
+                    return render_template("callback.html",
+                                           message="Token received and saved successfully.",
+                                           status_class="success",
+                                           year=2025), 200
                 else:
-                    return jsonify({"error": "No se pudo obtener el username del usuario."}), 400
+                    return render_template("callback.html",
+                                       message="Could not get the user's username.",
+                                       status_class="error",
+                                       year=2025), 400
             else:
-                return jsonify({"error": "No se pudo obtener información del usuario."}), 400
+                return render_template("callback.html",
+                                   message="Failed to get user information.",
+                                   status_class="error",
+                                   year=2025), 400
         else:
-            return jsonify({"error": "No se recibió el token de acceso."}), 400
+            return render_template("callback.html",
+                               message="Access token not received.",
+                               status_class="error",
+                               year=2025), 400
     else:
-        return jsonify({"error": "Error al obtener el token de acceso."}), 400
+        return render_template("callback.html",
+                               message="Error getting access token.",
+                               status_class="error",
+                               year=2025), 400
 
 
 
