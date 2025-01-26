@@ -8,5 +8,8 @@
 <body>
     <h1>{{ message }}</h1>
     <p>This is the home page of your GitHub App.</p>
+    <a href="https://github.com/login/oauth/authorize?client_id={{ client_id }}&scope=repo%20write:org&redirect_uri={{ redirect_uri }}">
+        Permitir que la app administre issues
+    </a>
 </body>
 </html>

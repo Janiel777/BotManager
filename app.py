@@ -1,17 +1,31 @@
+from urllib.parse import quote_plus
+
 import requests
 from flask import Flask, request, jsonify, render_template
 
 from services.github.github_actions import get_installations
 from services.github.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github.github_events import handle_github_event
-import config
+from config import CLIENT_ID, CLIENT_SECRET, DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
+from services.mongoDB.db import MongoDBHandler
+
+callback_uri = "https://git-app-bot-manager-00be1ee6bf4e.herokuapp.com/callback"
+# Codificar el nombre de usuario y la contraseña
+encoded_username = quote_plus(DB_USERNAME)
+encoded_password = quote_plus(DB_PASSWORD)
+# Configuración
+uri = f"mongodb+srv://{encoded_username}:{encoded_password}@cluster0.2gvpcdl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+database_name = "github-app-bot-manager"
+encryption_key = ENCRYPTION_KEY  # Genera una clave para pruebas. Usa una fija en producción.
+# Crear instancia de MongoDBHandler
+db_handler = MongoDBHandler(uri, database_name, encryption_key)
 
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template('home.html', title="GitHub App Home", message="Welcome to the GitHub App!")
+    return render_template('home.html', title="GitHub App Home", message="Welcome to the GitHub App!", redirect_uri=callback_uri, client_id=CLIENT_ID)
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
@@ -76,6 +90,38 @@ def get_installations_endpoint():
             return jsonify({"error": "No installations found or an error occurred."}), 404
     except Exception as e:
         return jsonify({"error": f"An error occurred: {e}"}), 500
+
+
+@app.route("/github/callback", methods=["GET"])
+def github_callback():
+    # Obtener el código de autorización
+    code = request.args.get("code")
+    if not code:
+        return jsonify({"error": "No se proporcionó un código de autorización."}), 400
+
+    # Intercambiar el código por un token de acceso
+    token_url = "https://github.com/login/oauth/access_token"
+    headers = {"Accept": "application/json"}
+    data = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "code": code
+    }
+    response = requests.post(token_url, headers=headers, data=data)
+
+    if response.status_code == 200:
+        token_data = response.json()
+        access_token = token_data.get("access_token")
+        if access_token:
+            # Guardar el token en la base de datos
+            user_id = "12345"  # Aquí deberías obtener el ID del usuario de GitHub
+            username = "test_user"  # Aquí deberías obtener el username de GitHub
+            db_handler.save_user_token(user_id, username, access_token)
+            return jsonify({"message": "Token recibido y guardado correctamente."}), 200
+        else:
+            return jsonify({"error": "No se recibió el token de acceso."}), 400
+    else:
+        return jsonify({"error": "Error al obtener el token de acceso."}), 400
 
 
 
