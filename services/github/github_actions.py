@@ -337,6 +337,9 @@ def reopen_issue(repo_owner, repo_name, issue_number, token):
     response = requests.patch(url, headers=headers, json=data)
     if response.status_code == 200:
         print(f"Issue #{issue_number} reabierto exitosamente.")
+        comment_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}/comments"
+        message = f"You do not have permission to close issues."
+        comment_on(comments_url=comment_url, message=message, token=token)
     else:
         print(f"Error al reabrir el issue #{issue_number}: {response.status_code}")
 
@@ -358,5 +361,8 @@ def close_issue(repo_owner, repo_name, issue_number, token):
     response = requests.patch(url, headers=headers, json=data)
     if response.status_code == 200:
         print(f"Issue #{issue_number} cerrado exitosamente.")
+        comment_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}/comments"
+        message = f"You do not have permission to reopen issues."
+        comment_on(comments_url=comment_url, message=message, token=token)
     else:
         print(f"Error al cerrar el issue #{issue_number}: {response.status_code}")
