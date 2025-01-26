@@ -6,9 +6,9 @@ from flask import Flask, request, jsonify, render_template
 from services.github.github_actions import get_installations
 from services.github.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github.github_events import handle_github_event
-from config import CLIENT_ID, CLIENT_SECRET, db_handler
+from config import CLIENT_ID, CLIENT_SECRET, db_handler, BASE_URL
 
-callback_uri = "https://git-app-bot-manager-00be1ee6bf4e.herokuapp.com/github/callback"
+callback_uri = f"{BASE_URL}/github/callback"
 
 app = Flask(__name__)
 
