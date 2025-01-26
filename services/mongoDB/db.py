@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from cryptography.fernet import Fernet
-from config import DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
-from urllib.parse import quote_plus
+# from config import DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
+# from urllib.parse import quote_plus
 
 class MongoDBHandler:
     def __init__(self, uri, database_name, encryption_key):
