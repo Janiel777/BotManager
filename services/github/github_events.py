@@ -45,13 +45,15 @@ def handle_issue_permissions(repo_owner, repo_name, action, username, issue_numb
     # Cargar permisos desde el archivo o configuración
     permissions = get_permissions_file(repo_owner, repo_name, token)
 
+    comment_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/issues/{issue_number}/comments"
+
     if not permissions:
         print("No se pudo cargar el archivo de permisos. Abortando operación.")
         return
 
     # Obtener usuarios autorizados para cerrar o reabrir issues
     allowed_users = permissions.get("users_allowed_to_close_issues", [])
-    username = "Juan del pueblo" # esto es de prueba simular que alguien mas trato de hacer un cambio
+
     if username not in allowed_users:
         print(f"Usuario {username} no tiene permisos para realizar la acción '{action}' en el issue #{issue_number}.")
 
@@ -62,9 +64,11 @@ def handle_issue_permissions(repo_owner, repo_name, action, username, issue_numb
                 allowed_user_token = user_data["token"]
                 if action == "closed":
                     print(f"Usando el token del usuario autorizado '{allowed_user}' para cerrar el issue #{issue_number}.")
+                    comment_on(comment_url, f"{username}, you do not have permission to perform this action.", allowed_user_token)
                     reopen_issue(repo_owner, repo_name, issue_number, allowed_user_token)
                 elif action == "reopened":
                     print(f"Usando el token del usuario autorizado '{allowed_user}' para reabrir el issue #{issue_number}.")
+                    comment_on(comment_url, f"{username}, you do not have permission to perform this action.", allowed_user_token)
                     close_issue(repo_owner, repo_name, issue_number, allowed_user_token)
                 return  # Salir después de encontrar y usar un token válido
 
