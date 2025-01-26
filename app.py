@@ -9,7 +9,7 @@ from services.github.github_events import handle_github_event
 from config import CLIENT_ID, CLIENT_SECRET, DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
 from services.mongoDB.db import MongoDBHandler
 
-callback_uri = "https://git-app-bot-manager-00be1ee6bf4e.herokuapp.com/callback"
+callback_uri = "https://git-app-bot-manager-00be1ee6bf4e.herokuapp.com/github/callback"
 # Codificar el nombre de usuario y la contraseña
 encoded_username = quote_plus(DB_USERNAME)
 encoded_password = quote_plus(DB_PASSWORD)
