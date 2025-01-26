@@ -1,4 +1,4 @@
-from config import db_handler
+
 from services.github.github_actions import comment_on, set_issue_labels, get_pull_request_details, \
     get_pull_request_files, get_open_issues_by_author, link_issue_to_pr, get_permissions_file, has_permission, \
     reopen_issue, close_issue
