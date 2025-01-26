@@ -3,7 +3,7 @@ from urllib.parse import quote_plus
 import requests
 from flask import Flask, request, jsonify, render_template
 
-from services.github.github_actions import get_installations
+from services.github.github_actions import get_installations, comment_on
 from services.github.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github.github_events import handle_github_event
 from config import CLIENT_ID, CLIENT_SECRET, DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
@@ -22,6 +22,24 @@ db_handler = MongoDBHandler(uri, database_name, encryption_key)
 
 
 app = Flask(__name__)
+
+
+def verificar_token(token):
+    url = "https://api.github.com/user"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json"
+    }
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        print("El token es válido.")
+        print("Información del usuario:", response.json())
+    else:
+        print("El token no es válido o ha expirado.")
+        print("Código de estado:", response.status_code)
+        print("Respuesta:", response.json())
+
 
 @app.route('/')
 def home():
