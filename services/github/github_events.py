@@ -62,10 +62,10 @@ def handle_issue_permissions(repo_owner, repo_name, action, username, issue_numb
                 allowed_user_token = user_data["token"]
                 if action == "closed":
                     print(f"Usando el token del usuario autorizado '{allowed_user}' para cerrar el issue #{issue_number}.")
-                    close_issue(repo_owner, repo_name, issue_number, allowed_user_token)
+                    reopen_issue(repo_owner, repo_name, issue_number, allowed_user_token)
                 elif action == "reopened":
                     print(f"Usando el token del usuario autorizado '{allowed_user}' para reabrir el issue #{issue_number}.")
-                    reopen_issue(repo_owner, repo_name, issue_number, allowed_user_token)
+                    close_issue(repo_owner, repo_name, issue_number, allowed_user_token)
                 return  # Salir después de encontrar y usar un token válido
 
         print(f"No se encontró un usuario autorizado con un token válido para realizar la acción '{action}'.")
