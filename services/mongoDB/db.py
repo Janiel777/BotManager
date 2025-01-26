@@ -69,43 +69,43 @@ class MongoDBHandler:
             self._close_connection()
 
 
-if __name__ == "__main__":
-    # Codificar el nombre de usuario y la contraseña
-    encoded_username = quote_plus(DB_USERNAME)
-    encoded_password = quote_plus(DB_PASSWORD)
-    # Configuración
-    uri = f"mongodb+srv://{encoded_username}:{encoded_password}@cluster0.2gvpcdl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    database_name = "github-app-bot-manager"
-    encryption_key = ENCRYPTION_KEY  # Genera una clave para pruebas. Usa una fija en producción.
-
-    # Crear instancia de MongoDBHandler
-    db_handler = MongoDBHandler(uri, database_name, encryption_key)
-
-    # Probar guardado de token
-    user_id = "12345"
-    username = "test_user"
-    token = "sample_token_abc123"
-    print("Guardando token...")
-    db_handler.save_user_token(user_id, username, token)
-    print("Token guardado correctamente.")
-
-    # Probar recuperación de token
-    print("Recuperando token...")
-    user_data = db_handler.get_user_token(user_id)
-    if user_data:
-        print(f"Datos recuperados: {user_data}")
-    else:
-        print("No se encontró el token del usuario.")
-
-    # Probar eliminación de token
-    print("Eliminando token...")
-    db_handler.delete_user_token(user_id)
-    print("Token eliminado correctamente.")
-
-    # Verificar que el token fue eliminado
-    print("Verificando eliminación...")
-    user_data = db_handler.get_user_token(user_id)
-    if not user_data:
-        print("El token fue eliminado exitosamente.")
-    else:
-        print(f"Error: El token sigue existiendo: {user_data}")
+# if __name__ == "__main__":
+#     # Codificar el nombre de usuario y la contraseña
+#     encoded_username = quote_plus(DB_USERNAME)
+#     encoded_password = quote_plus(DB_PASSWORD)
+#     # Configuración
+#     uri = f"mongodb+srv://{encoded_username}:{encoded_password}@cluster0.2gvpcdl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+#     database_name = "github-app-bot-manager"
+#     encryption_key = ENCRYPTION_KEY  # Genera una clave para pruebas. Usa una fija en producción.
+#
+#     # Crear instancia de MongoDBHandler
+#     db_handler = MongoDBHandler(uri, database_name, encryption_key)
+#
+#     # Probar guardado de token
+#     user_id = "12345"
+#     username = "test_user"
+#     token = "sample_token_abc123"
+#     print("Guardando token...")
+#     db_handler.save_user_token(user_id, username, token)
+#     print("Token guardado correctamente.")
+#
+#     # Probar recuperación de token
+#     print("Recuperando token...")
+#     user_data = db_handler.get_user_token(user_id)
+#     if user_data:
+#         print(f"Datos recuperados: {user_data}")
+#     else:
+#         print("No se encontró el token del usuario.")
+#
+#     # Probar eliminación de token
+#     print("Eliminando token...")
+#     db_handler.delete_user_token(user_id)
+#     print("Token eliminado correctamente.")
+#
+#     # Verificar que el token fue eliminado
+#     print("Verificando eliminación...")
+#     user_data = db_handler.get_user_token(user_id)
+#     if not user_data:
+#         print("El token fue eliminado exitosamente.")
+#     else:
+#         print(f"Error: El token sigue existiendo: {user_data}")
