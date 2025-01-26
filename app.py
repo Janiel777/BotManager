@@ -3,7 +3,7 @@ from urllib.parse import quote_plus
 import requests
 from flask import Flask, request, jsonify, render_template
 
-from services.github.github_actions import get_installations, comment_on
+from services.github.github_actions import get_installations, comment_on, close_issue
 from services.github.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github.github_events import handle_github_event
 from config import CLIENT_ID, CLIENT_SECRET, DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
@@ -131,15 +131,31 @@ def github_callback():
         token_data = response.json()
         access_token = token_data.get("access_token")
         if access_token:
-            # Guardar el token en la base de datos
-            user_id = "12345"  # Aquí deberías obtener el ID del usuario de GitHub
-            username = "test_user"  # Aquí deberías obtener el username de GitHub
-            db_handler.save_user_token(user_id, username, access_token)
-            return jsonify({"message": "Token recibido y guardado correctamente."}), 200
+            # Obtener información del usuario con el token
+            user_info_url = "https://api.github.com/user"
+            user_headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/json"
+            }
+            user_response = requests.get(user_info_url, headers=user_headers)
+
+            if user_response.status_code == 200:
+                user_info = user_response.json()
+                username = user_info.get("login")
+                if username:
+                    # Guardar el token en la base de datos
+                    db_handler.save_user_token(username, access_token)
+                    return jsonify({"message": "Token recibido y guardado correctamente."}), 200
+                else:
+                    return jsonify({"error": "No se pudo obtener el username del usuario."}), 400
+            else:
+                return jsonify({"error": "No se pudo obtener información del usuario."}), 400
         else:
             return jsonify({"error": "No se recibió el token de acceso."}), 400
     else:
         return jsonify({"error": "Error al obtener el token de acceso."}), 400
+
+
 
 
 

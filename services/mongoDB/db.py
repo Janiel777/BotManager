@@ -27,7 +27,7 @@ class MongoDBHandler:
         if hasattr(self, 'client'):
             self.client.close()
 
-    def save_user_token(self, user_id, username, token):
+    def save_user_token(self, username, token):
         """
         Guarda un token de usuario en la base de datos, encriptado.
         """
@@ -36,35 +36,35 @@ class MongoDBHandler:
             encrypted_token = self.cipher.encrypt(token.encode())
             collection = self.db["user_tokens"]
             collection.update_one(
-                {"user_id": user_id},
-                {"$set": {"username": username, "token": encrypted_token.decode()}},
+                {"username": username},
+                {"$set": {"token": encrypted_token.decode()}},
                 upsert=True
             )
         finally:
             self._close_connection()
 
-    def get_user_token(self, user_id):
+    def get_user_token(self, username):
         """
-        Recupera un token de usuario por su ID, desencriptado.
+        Recupera un token de usuario por su username, desencriptado.
         """
         try:
             self._open_connection()
             collection = self.db["user_tokens"]
-            user_data = collection.find_one({"user_id": user_id})
+            user_data = collection.find_one({"username": username})
             if user_data and "token" in user_data:
                 user_data["token"] = self.cipher.decrypt(user_data["token"].encode()).decode()
             return user_data
         finally:
             self._close_connection()
 
-    def delete_user_token(self, user_id):
+    def delete_user_token(self, username):
         """
-        Elimina el token de un usuario por su ID.
+        Elimina el token de un usuario por su username.
         """
         try:
             self._open_connection()
             collection = self.db["user_tokens"]
-            collection.delete_one({"user_id": user_id})
+            collection.delete_one({"username": username})
         finally:
             self._close_connection()
 
