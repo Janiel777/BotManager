@@ -4,12 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home_style.css') }}">
 </head>
 <body>
-    <h1>{{ message }}</h1>
-    <p>This is the home page of your GitHub App.</p>
-    <a href="https://github.com/login/oauth/authorize?client_id={{ client_id }}&scope=write:org%20read:org&redirect_uri={{ redirect_uri }}&prompt=consent">
-        Permitir que la app administre issues
-    </a>
+    <header>
+        <h1>{{ message }}</h1>
+    </header>
+    <main>
+        <p>Welcome to the home page of your GitHub App. Explore the features below:</p>
+        <a class="cta" href="https://github.com/login/oauth/authorize?client_id={{ client_id }}&scope=write:org%20read:org&redirect_uri={{ redirect_uri }}&prompt=consent">
+            Allow the app to perform actions on your name
+        </a>
+
+        <section class="features">
+            <div class="feature">
+                <h2>1. Auto-label Issues</h2>
+                <p>Automatically assigns labels to new issues using the power of ChatGPT.</p>
+            </div>
+            <div class="feature">
+                <h2>2. Intelligent Pull Request Summaries</h2>
+                <p>Comments a summary of changes in pull requests and links related issues to the pull request.</p>
+            </div>
+            <div class="feature">
+                <h2>3. Issue Permission Enforcement</h2>
+                <p>Prevents unauthorized users from reopening or closing issues, enforcing the actions by authorized personnel.</p>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; {{ year }} GitHub App. Built for managing repository actions efficiently.</p>
+        <p>
+            <a href="https://github.com/Janiel777/BotManager" target="_blank" rel="noopener noreferrer">
+                View the source code on GitHub
+            </a>
+        </p>
+    </footer>
 </body>
 </html>

@@ -3,18 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+    <title>Setup - GitHub App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='setup_style.css') }}">
 </head>
 <body>
-    <h1>GitHub App Setup</h1>
-    <form method="POST">
-        <label for="setting1">Setting 1:</label>
-        <input type="text" name="setting1" id="setting1" required>
-        <br>
-        <label for="setting2">Setting 2:</label>
-        <input type="text" name="setting2" id="setting2" required>
-        <br>
-        <button type="submit">Submit</button>
-    </form>
+    <header>
+        <h1>GitHub App Setup</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Setup Instructions</h2>
+            <p>To use this GitHub App in a repository, please create a <code>permissions.json</code> file with the following structure:</p>
+            <pre>
+{
+  "users_allowed_to_close_issues": [
+    "User1",
+    "User2",
+    "User..."
+  ]
+}
+            </pre>
+            <p>The <code>permissions.json</code> file is needed to verify if a user has permission to close or reopen an issue.
+            If the user does not have permission, the app will retrieve a token from the database to perform the action on behalf of an authorized user and execute the opposite operation.
+            It is crucial for authorized users to generate these tokens. You can find the link to generate tokens on the home page of this app.</p>
+            <p>Place the <code>permissions.json</code> file in the root directory of the repository where the app is installed.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; {{ year }} GitHub App. Built for managing repository actions efficiently.</p>
+        <p>
+            <a href="https://github.com/Janiel777/BotManager" target="_blank" rel="noopener noreferrer">
+                View the source code on GitHub
+            </a>
+        </p>
+    </footer>
 </body>
 </html>
