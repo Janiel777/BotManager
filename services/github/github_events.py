@@ -1,3 +1,4 @@
+from config import db_handler
 from services.github.github_actions import comment_on, set_issue_labels, get_pull_request_details, \
     get_pull_request_files, get_open_issues_by_author, link_issue_to_pr, get_permissions_file, has_permission, \
     reopen_issue, close_issue
@@ -29,6 +30,7 @@ def handle_issue_event(payload, token):
     if action in ["closed", "reopened"]:
         # Manejar permisos para cerrar/reabrir issues
         print(f"Evento detectado: {action} issue #{issue_number} por {username}")
+
         handle_issue_permissions(repo_owner, repo_name, action, username, issue_number, token)
 
     elif action == "opened":
@@ -38,32 +40,37 @@ def handle_issue_event(payload, token):
 
 def handle_issue_permissions(repo_owner, repo_name, action, username, issue_number, token):
     """
-    Verifica los permisos de un usuario para cerrar o reabrir un issue.
-    :param repo_owner: Dueño del repositorio.
-    :param repo_name: Nombre del repositorio.
-    :param action: Acción realizada (e.g., "closed", "reopened").
-    :param username: Usuario que realizó la acción.
-    :param issue_number: Número del issue.
-    :param token: Token de autenticación para la GitHub App.
+    Verifica los permisos de un usuario para cerrar o reabrir un issue y utiliza un usuario autorizado para hacerlo si es necesario.
     """
+    # Cargar permisos desde el archivo o configuración
     permissions = get_permissions_file(repo_owner, repo_name, token)
 
     if not permissions:
         print("No se pudo cargar el archivo de permisos. Abortando operación.")
         return
 
+    # Obtener usuarios autorizados para cerrar o reabrir issues
     allowed_users = permissions.get("users_allowed_to_close_issues", [])
-    allowed_users.append("janiel777-bot-manager[bot]")
-    # print(f"allowed_users: {allowed_users}")
-
+    username = "Juan del pueblo" # esto es de prueba simular que alguien mas trato de hacer un cambio
     if username not in allowed_users:
-        if action == "closed":
-            print(f"Usuario {username} no tiene permisos para cerrar el issue #{issue_number}. Reabriendo...")
-            reopen_issue(repo_owner, repo_name, issue_number, token)
-        elif action == "reopened":
-            print(f"Usuario {username} no tiene permisos para reabrir el issue #{issue_number}. Cerrando...")
-            close_issue(repo_owner, repo_name, issue_number, token)
-        print(f"Usuario {username} no tiene permisos para {action} el issue #{issue_number}.")
+        print(f"Usuario {username} no tiene permisos para realizar la acción '{action}' en el issue #{issue_number}.")
+
+        # Buscar un token válido de un usuario autorizado
+        for allowed_user in allowed_users:
+            user_data = db_handler.get_user_token(allowed_user)
+            if user_data and "token" in user_data:
+                allowed_user_token = user_data["token"]
+                if action == "closed":
+                    print(f"Usando el token del usuario autorizado '{allowed_user}' para cerrar el issue #{issue_number}.")
+                    close_issue(repo_owner, repo_name, issue_number, allowed_user_token)
+                elif action == "reopened":
+                    print(f"Usando el token del usuario autorizado '{allowed_user}' para reabrir el issue #{issue_number}.")
+                    reopen_issue(repo_owner, repo_name, issue_number, allowed_user_token)
+                return  # Salir después de encontrar y usar un token válido
+
+        print(f"No se encontró un usuario autorizado con un token válido para realizar la acción '{action}'.")
+    else:
+        print(f"El usuario {username} tiene permisos para realizar la acción '{action}' en el issue #{issue_number}.")
 
 def handle_pull_request_opened_event(payload, token):
     """

@@ -1,25 +1,14 @@
-from urllib.parse import quote_plus
+
 
 import requests
 from flask import Flask, request, jsonify, render_template
 
-from services.github.github_actions import get_installations, comment_on, close_issue
+from services.github.github_actions import get_installations
 from services.github.github_auth import get_or_create_installation_token, is_valid_signature
 from services.github.github_events import handle_github_event
-from config import CLIENT_ID, CLIENT_SECRET, DB_USERNAME, DB_PASSWORD, ENCRYPTION_KEY
-from services.mongoDB.db import MongoDBHandler
+from config import CLIENT_ID, CLIENT_SECRET
 
 callback_uri = "https://git-app-bot-manager-00be1ee6bf4e.herokuapp.com/github/callback"
-# Codificar el nombre de usuario y la contraseña
-encoded_username = quote_plus(DB_USERNAME)
-encoded_password = quote_plus(DB_PASSWORD)
-# Configuración
-uri = f"mongodb+srv://{encoded_username}:{encoded_password}@cluster0.2gvpcdl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-database_name = "github-app-bot-manager"
-encryption_key = ENCRYPTION_KEY  # Genera una clave para pruebas. Usa una fija en producción.
-# Crear instancia de MongoDBHandler
-db_handler = MongoDBHandler(uri, database_name, encryption_key)
-
 
 app = Flask(__name__)
 
